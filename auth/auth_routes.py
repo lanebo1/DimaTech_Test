@@ -1,9 +1,12 @@
-import os
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 import jwt
 from jwt import ExpiredSignatureError, PyJWTError
 from passlib.context import CryptContext
+import hashlib
+import os
+
+from database.schemas import Transaction
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
@@ -39,3 +42,12 @@ def decode_token(token: str):
         raise HTTPException(status_code=401, detail="Token has expired")
     except PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+def verify_signature(payload: Transaction) -> bool:
+    data_string = f"{payload.account_id}{int(payload.amount)}{payload.transaction_id}{payload.user_id}{SECRET_KEY}"
+    signature = hashlib.sha256(data_string.encode()).hexdigest()
+    print(f"Data String: {data_string}")
+    print(f"Generated Signature: {signature}")
+    print(f"Provided Signature: {payload.signature}")
+    return signature == payload.signature

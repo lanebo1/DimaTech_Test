@@ -1,18 +1,12 @@
-from fastapi import APIRouter
 from datetime import timedelta
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
 from auth.auth_routes import create_access_token
-from database.crud import get_current_user
-from database.models import User, Account, Payment
+from database.models import User
 from database.database import get_db
-from database.schemas import User as UserSchema, Account as AccountSchema, Payment as PaymentSchema, Token
-from pydantic import BaseModel
-from typing import List
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from database.schemas import Token
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
@@ -32,6 +26,3 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-

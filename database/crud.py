@@ -1,13 +1,11 @@
 import os
-
 import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from database.database import get_db
-from database.models import User, Account, Payment
+from database.models import User, Account
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

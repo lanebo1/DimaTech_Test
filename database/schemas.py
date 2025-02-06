@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr
-from typing import List, Optional
+from pydantic import EmailStr
 from uuid import UUID, uuid4
+from pydantic import BaseModel
 
 
 class Token(BaseModel):
@@ -28,7 +28,9 @@ class Account(BaseModel):
     balance: float = 0.0
 
 
-class Payment(BaseModel):
-    id: UUID = uuid4()
+class Transaction(BaseModel):
+    transaction_id: UUID
     account_id: UUID
+    user_id: UUID
     amount: float
+    signature: str
