@@ -10,8 +10,9 @@ DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USERNAME')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_PORT = os.getenv('DB_PORT', '5432')
+DB_PORT = os.getenv('DB_PORT', '5450')
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+print("DB: --------- ", DATABASE_URL)
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 
@@ -23,11 +24,11 @@ async_session = sessionmaker(
 
 Base = declarative_base()
 
-
 async def init_db():
+    print("Creating tables")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
+    print("Tables created", DATABASE_URL)
 
 async def get_db():
     async with async_session() as session:
