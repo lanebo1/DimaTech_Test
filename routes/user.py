@@ -11,19 +11,19 @@ router = APIRouter()
 
 
 @router.get("/me", response_model=UserSchema)
-async def read_users_me(current_user: User = Depends(is_non_admin_user)):
+def read_users_me(current_user: User = Depends(is_non_admin_user)):
     return current_user
 
 
 @router.get("/accounts", response_model=List[AccountSchema])
-async def get_accounts(current_user: User = Depends(is_non_admin_user), db: AsyncSession = Depends(get_db)):
+def get_accounts(current_user: User = Depends(is_non_admin_user), db: AsyncSession = Depends(get_db)):
     query = select(Account).where(Account.user_id == current_user.id)
-    result = await db.execute(query)
+    result = db.execute(query)
     return result.scalars().all()
 
 
 @router.get("/payments", response_model=List[TransactionSchema])
-async def get_payments(current_user: User = Depends(is_non_admin_user), db: AsyncSession = Depends(get_db)):
+def get_payments(current_user: User = Depends(is_non_admin_user), db: AsyncSession = Depends(get_db)):
     query = select(Transaction).join(Account).where(Account.user_id == current_user.id)
-    result = await db.execute(query)
+    result = db.execute(query)
     return result.scalars().all()

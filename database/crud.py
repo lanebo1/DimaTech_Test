@@ -13,10 +13,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     query = select(User).where(User.email == decoded_token['sub'])
-    result = await db.execute(query)
+    result = db.execute(query)
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")

@@ -17,27 +17,27 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 
 @router.post("/webhook")
-async def process_webhook(payload: TransactionSchema, db: AsyncSession = Depends(get_db)):
+def process_webhook(payload: TransactionSchema, db: AsyncSession = Depends(get_db)):
     if not verify_signature(payload):
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     query = select(User).where(User.id == payload.user_id)
-    result = await db.execute(query)
+    result = db.execute(query)
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     query = select(Account).where(Account.id == payload.account_id, Account.user_id == payload.user_id)
-    result = await db.execute(query)
+    result = db.execute(query)
     account = result.scalars().first()
     if not account:
         account = Account(id=payload.account_id, user_id=payload.user_id, balance=0.0)
         db.add(account)
-        await db.commit()
-        await db.refresh(account)
+        db.commit()
+        db.refresh(account)
 
     query = select(Transaction).where(Transaction.transaction_id == payload.transaction_id)
-    result = await db.execute(query)
+    result = db.execute(query)
     transaction = result.scalars().first()
     if transaction:
         raise HTTPException(status_code=400, detail="Transaction already processed")
@@ -50,8 +50,8 @@ async def process_webhook(payload: TransactionSchema, db: AsyncSession = Depends
     )
     db.add(transaction)
     account.balance += payload.amount
-    await db.commit()
-    await db.refresh(account)
+    db.commit()
+    db.refresh(account)
 
     return {"detail": "Transaction processed successfully"}
 

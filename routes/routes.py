@@ -17,9 +17,9 @@ def read_root():
 
 
 @router.post("/token", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     query = select(User).where(User.email == form_data.username)
-    result = await db.execute(query)
+    result = db.execute(query)
     user = result.scalars().first()
     if not user or not user.verify_password(form_data.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")

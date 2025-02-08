@@ -4,6 +4,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 import uuid
 from passlib.context import CryptContext
+import os
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 Base = declarative_base()
@@ -42,3 +45,17 @@ class Transaction(Base):
     amount = Column(Float, nullable=False)
 
     account = relationship("Account", back_populates="transactions")
+
+
+load_dotenv()
+
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USERNAME')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_HOST = os.getenv('DB_HOST', 'localhost')
+DB_PORT = os.getenv('DB_PORT', '5432')
+
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+engine = create_engine(DATABASE_URL)
+Base.metadata.create_all(engine)
