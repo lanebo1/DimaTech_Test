@@ -22,9 +22,6 @@ class User(Base):
 
     accounts = relationship("Account", back_populates="user")
 
-    def verify_password(self, password: str) -> bool:
-        return pwd_context.verify(password, self.password)
-
 
 class Account(Base):
     __tablename__ = 'accounts'

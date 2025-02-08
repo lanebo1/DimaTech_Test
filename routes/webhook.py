@@ -1,4 +1,5 @@
 from random import randint
+from sqlalchemy import cast
 from fastapi import HTTPException
 from sqlalchemy.future import select
 from fastapi import APIRouter, Depends
@@ -10,7 +11,7 @@ from database.schemas import Transaction as TransactionSchema
 from auth.auth_routes import verify_signature
 from database.database import get_db
 from database.models import User, Account, Transaction
-from database.schemas import Transaction
+from sqlalchemy.dialects.postgresql import UUID
 
 router = APIRouter()
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -36,7 +37,7 @@ def process_webhook(payload: TransactionSchema, db: AsyncSession = Depends(get_d
         db.commit()
         db.refresh(account)
 
-    query = select(Transaction).where(Transaction.transaction_id == payload.transaction_id)
+    query = select(Transaction).where(Transaction.transaction_id == cast(payload.transaction_id, UUID))
     result = db.execute(query)
     transaction = result.scalars().first()
     if transaction:
@@ -62,9 +63,9 @@ def generate_signature(payload: dict) -> str:
 
 
 @router.get("/generate-webhook", response_model=TransactionSchema)
-async def generate_webhook(user_id: str, db: AsyncSession = Depends(get_db)):
+def generate_webhook(user_id: str, db: AsyncSession = Depends(get_db)):
     query = select(User).where(User.id == user_id)
-    result = await db.execute(query)
+    result = db.execute(query)
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
