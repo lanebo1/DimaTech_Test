@@ -2,7 +2,7 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from auth.auth_routes import create_access_token
+from auth.auth_ops import create_access_token
 from database.models import User, pwd_context
 from database.database import get_db
 from database.schemas import Token, UserCreate
