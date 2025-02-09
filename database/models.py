@@ -40,6 +40,7 @@ class Transaction(Base):
     account_id = Column(UUID(as_uuid=True), ForeignKey('accounts.id'), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     amount = Column(Float, nullable=False)
+    signature = Column(String, nullable=False)
 
     account = relationship("Account", back_populates="transactions")
 

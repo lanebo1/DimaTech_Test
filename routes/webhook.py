@@ -12,6 +12,7 @@ from auth.auth_routes import verify_signature
 from database.database import get_db
 from database.models import User, Account, Transaction
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import cast, String
 
 router = APIRouter()
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -37,7 +38,7 @@ def process_webhook(payload: TransactionSchema, db: AsyncSession = Depends(get_d
         db.commit()
         db.refresh(account)
 
-    query = select(Transaction).where(Transaction.transaction_id == cast(payload.transaction_id, UUID))
+    query = select(Transaction).where(Transaction.transaction_id == cast(payload.transaction_id, String))
     result = db.execute(query)
     transaction = result.scalars().first()
     if transaction:
@@ -47,7 +48,8 @@ def process_webhook(payload: TransactionSchema, db: AsyncSession = Depends(get_d
         transaction_id=payload.transaction_id,
         account_id=payload.account_id,
         user_id=payload.user_id,
-        amount=payload.amount
+        amount=payload.amount,
+        signature=payload.signature
     )
     db.add(transaction)
     account.balance += payload.amount

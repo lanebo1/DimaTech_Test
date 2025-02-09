@@ -24,6 +24,6 @@ def get_accounts(current_user: User = Depends(is_non_admin_user), db: AsyncSessi
 
 @router.get("/payments", response_model=List[TransactionSchema])
 def get_payments(current_user: User = Depends(is_non_admin_user), db: AsyncSession = Depends(get_db)):
-    query = select(Transaction).join(Account).where(Account.user_id == current_user.id)
+    query = select(Transaction).where(Transaction.user_id == current_user.id)
     result = db.execute(query)
     return result.scalars().all()
