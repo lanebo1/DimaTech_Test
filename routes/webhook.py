@@ -65,21 +65,38 @@ def generate_signature(payload: dict) -> str:
 
 
 @router.get("/generate-webhook", response_model=TransactionSchema)
-def generate_webhook(user_id: str, db: AsyncSession = Depends(get_db)):
+def generate_webhook(user_id: str, user_account_id: str = None, db: AsyncSession = Depends(get_db)):
     query = select(User).where(User.id == user_id)
     result = db.execute(query)
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    account_id = str(uuid4())
+    if user_account_id:
+        query = select(Account).where(Account.id == user_account_id, Account.user_id == user_id)
+        result = db.execute(query)
+        account = result.scalars().first()
+        if not account:
+            raise HTTPException(status_code=404, detail="Account not found")
+    else:
+        account_id = str(uuid4())
+        account = Account(id=account_id, user_id=user_id, balance=0.0)
+        db.add(account)
+        db.commit()
+        db.refresh(account)
+        account_created = True
+
     amount = randint(1, 1000)
     payload = {
         "transaction_id": str(uuid4()),
         "user_id": user_id,
-        "account_id": account_id,
+        "account_id": account.id,
         "amount": amount
     }
     payload["signature"] = generate_signature(payload)
 
-    return payload
+    response = payload
+    if not user_account_id:
+        response["detail"] = "New account created"
+
+    return response
