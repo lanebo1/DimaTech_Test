@@ -8,7 +8,7 @@ from uuid import uuid4
 import hashlib
 import os
 from database.schemas import Transaction as TransactionSchema
-from auth.auth_routes import verify_signature
+from auth.auth_ops import verify_signature
 from database.database import get_db
 from database.models import User, Account, Transaction
 from sqlalchemy.dialects.postgresql import UUID
